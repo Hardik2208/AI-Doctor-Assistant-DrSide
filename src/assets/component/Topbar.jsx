@@ -52,8 +52,8 @@ export default function Topbar() {
             className="h-10 w-10 rounded-full shadow-sm"
           />
           <div>
-            <p className="text-sm font-semibold text-gray-800">Dr. Sarah Smith</p>
-            <p className="text-xs text-gray-500">Cardiologist</p>
+            <p className="text-sm font-semibold text-gray-800">Hardik</p>
+            <p className="text-xs text-gray-500">Neurologist</p>
           </div>
         </div>
       </div>

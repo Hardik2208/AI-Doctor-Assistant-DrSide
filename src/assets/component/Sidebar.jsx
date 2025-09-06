@@ -1,3 +1,4 @@
+import { Link, useLocation } from "react-router-dom";
 import {
   Stethoscope,
   LayoutDashboard,
@@ -9,15 +10,22 @@ import {
   Settings,
 } from "lucide-react";
 
-export default function Sidebar({ setActiveView, activeView }) {
+export default function Sidebar() {
+  const location = useLocation();
+
   const menuItems = [
-    { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { key: "inbox", label: "Inbox", icon: Inbox },
-    { key: "patients", label: "Patients", icon: Users },
-    { key: "appointments", label: "Appointments", icon: Calendar },
-    { key: "reports", label: "Reports", icon: FileText },
-    { key: "vitals", label: "Vitals", icon: Activity },
-    { key: "settings", label: "Settings", icon: Settings },
+    { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/" },
+    { key: "inbox", label: "Inbox", icon: Inbox, path: "/inbox" },
+    { key: "patients", label: "Patients", icon: Users, path: "/patients" },
+    {
+      key: "appointments",
+      label: "Appointments",
+      icon: Calendar,
+      path: "/appointments",
+    },
+    { key: "reports", label: "Reports", icon: FileText, path: "/reports" },
+    { key: "vitals", label: "Vitals", icon: Activity, path: "/vitals" },
+    { key: "settings", label: "Settings", icon: Settings, path: "/settings" },
   ];
 
   return (
@@ -38,14 +46,14 @@ export default function Sidebar({ setActiveView, activeView }) {
       {/* Menu */}
       <nav className="flex-1 p-4 space-y-1">
         {menuItems.map((item) => {
-          const isActive = activeView === item.key;
+          const isActive = location.pathname === item.path;
           const Icon = item.icon;
 
           return (
-            <button
+            <Link
               key={item.key}
-              onClick={() => setActiveView(item.key)}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 cursor-pointer
+              to={item.path}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200
                 ${
                   isActive
                     ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg"
@@ -58,7 +66,7 @@ export default function Sidebar({ setActiveView, activeView }) {
                 }`}
               />
               <span className="font-medium text-sm">{item.label}</span>
-            </button>
+            </Link>
           );
         })}
       </nav>

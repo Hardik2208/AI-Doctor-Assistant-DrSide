@@ -1,6 +1,27 @@
-import { Bell, Shield, Palette, User, LogOut } from "lucide-react";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "./supabaseClient"; // Adjust the path as needed
+import {
+  Bell,
+  Shield,
+  Palette,
+  User,
+  LogOut,
+} from "lucide-react";
 
 export default function Settings() {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Logout failed:", error.message);
+    } else {
+      // Redirect to the login page after successful logout
+      navigate("/login");
+    }
+  };
+
   return (
     <div className="p-8 bg-gray-50/70 backdrop-blur-xl min-h-screen rounded-l-3xl">
       {/* Header */}
@@ -81,7 +102,10 @@ export default function Settings() {
 
         {/* Logout */}
         <div className="bg-white/80 backdrop-blur-lg border border-gray-100/70 shadow-lg rounded-2xl p-6 text-center">
-          <button className="px-5 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-medium flex items-center justify-center gap-2 shadow transition">
+          <button
+            onClick={handleLogout}
+            className="px-5 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-medium flex items-center justify-center gap-2 shadow transition"
+          >
             <LogOut className="w-4 h-4" /> Logout
           </button>
         </div>
