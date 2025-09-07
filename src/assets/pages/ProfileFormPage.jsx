@@ -6,8 +6,8 @@ import axios from "axios";
 // A small CSS rule to visually indicate required fields
 const requiredFieldLabel = {
   content: '"*"',
-  color: 'red',
-  marginLeft: '4px',
+  color: "red",
+  marginLeft: "4px",
 };
 
 export default function ProfileFormPage() {
@@ -61,6 +61,8 @@ export default function ProfileFormPage() {
     });
   };
 
+  // ... inside your ProfileFormPage component
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -77,25 +79,40 @@ export default function ProfileFormPage() {
       return;
     }
 
+    // Get the Supabase ID from the authenticated user object
+    const supabaseId = user.id;
+
     const backendApiUrl = `https://ai-doctor-assistant-backend-ai-ml.onrender.com/api/doctor-profile`;
 
     try {
       const requestData = {
         ...formData,
         email: user.email,
-        contactNumber: formData.contactNumber ? Number(formData.contactNumber) : null,
-        alternateContactNumber: formData.alternateContactNumber ? Number(formData.alternateContactNumber) : null,
-        yearsOfExperience: formData.yearsOfExperience ? Number(formData.yearsOfExperience) : null,
+        // Pass the Supabase ID to your backend
+        supabaseId: supabaseId,
+        contactNumber: formData.contactNumber
+          ? Number(formData.contactNumber)
+          : null,
+        alternateContactNumber: formData.alternateContactNumber
+          ? Number(formData.alternateContactNumber)
+          : null,
+        yearsOfExperience: formData.yearsOfExperience
+          ? Number(formData.yearsOfExperience)
+          : null,
         pincode: formData.pincode ? Number(formData.pincode) : null,
-        consultationFee: formData.consultationFee ? Number(formData.consultationFee) : null,
+        consultationFee: formData.consultationFee
+          ? Number(formData.consultationFee)
+          : null,
       };
 
       const response = await axios.post(backendApiUrl, requestData);
 
       if (response.status === 201) {
+        // You may want to update the 'profiles' table in Supabase
+        // as well, linking the two. This part of your code is correct.
         const { error: updateError } = await supabase
           .from("profiles")
-          .update({ is_profile_complete: 'true' })
+          .update({ is_profile_complete: "true" })
           .eq("email", user.email);
 
         if (updateError) {
@@ -106,40 +123,59 @@ export default function ProfileFormPage() {
         navigate("/");
       }
     } catch (error) {
-      if (error.response) {
-        setMessage(error.response.data.message || "Failed to create profile.");
-      } else if (error.message) {
-        setMessage(`Failed to update profile status: ${error.message}`);
-      } else {
-        setMessage("An unexpected error occurred. Please try again.");
-      }
+      // ... error handling
     } finally {
       setSubmitting(false);
     }
   };
 
-  const degrees = ['MBBS', 'BDS', 'BAMS', 'BHMS', 'BUMS', 'BNYS', 'MD', 'MS', 'DM', 'MCh', 'GNM', 'ANM'];
-  const workingDaysList = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const degrees = [
+    "MBBS",
+    "BDS",
+    "BAMS",
+    "BHMS",
+    "BUMS",
+    "BNYS",
+    "MD",
+    "MS",
+    "DM",
+    "MCh",
+    "GNM",
+    "ANM",
+  ];
+  const workingDaysList = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const servicesList = [
-    'General Consultation / OPD',
-    'Emergency Care (First Aid, Trauma, Basic Treatment)',
-    'Maternal Care (Antenatal & Postnatal Checkups)',
-    'Child Health / Pediatrics',
-    'Immunization / Vaccination',
-    'Family Planning & Counseling',
-    'Normal Delivery (Non-surgical)',
-    'Minor Surgeries / Procedures (e.g., sutures, dressing, abscess drainage)',
-    'Diagnostic Services (Lab tests, X-ray, Ultrasound if available)',
-    'Pharmacy / Medicines Dispensing',
-    'Chronic Disease Management (Diabetes, Hypertension, Asthma, etc.)',
-    'Ayush / Alternative Medicine (Ayurveda, Homeopathy, Unani, Yoga, Naturopathy)',
+    "General Consultation / OPD",
+    "Emergency Care (First Aid, Trauma, Basic Treatment)",
+    "Maternal Care (Antenatal & Postnatal Checkups)",
+    "Child Health / Pediatrics",
+    "Immunization / Vaccination",
+    "Family Planning & Counseling",
+    "Normal Delivery (Non-surgical)",
+    "Minor Surgeries / Procedures (e.g., sutures, dressing, abscess drainage)",
+    "Diagnostic Services (Lab tests, X-ray, Ultrasound if available)",
+    "Pharmacy / Medicines Dispensing",
+    "Chronic Disease Management (Diabetes, Hypertension, Asthma, etc.)",
+    "Ayush / Alternative Medicine (Ayurveda, Homeopathy, Unani, Yoga, Naturopathy)",
   ];
 
   const specializations = [
-    'General Physician', 'Pediatrician', 'Gynecologist / Obstetrician (Women’s Health)',
-    'Cardiologist', 'Neurologist', 'Orthopedic Doctor', 'Dermatologist', 'Psychiatrist',
-    'Ophthalmologist', 'ENT Specialist', 'Gastroenterologist', 'Pulmonologist',
-    'Nephrologist', 'Endocrinologist', 'Oncologist', 'Urologist'
+    "General Physician",
+    "Pediatrician",
+    "Gynecologist / Obstetrician (Women’s Health)",
+    "Cardiologist",
+    "Neurologist",
+    "Orthopedic Doctor",
+    "Dermatologist",
+    "Psychiatrist",
+    "Ophthalmologist",
+    "ENT Specialist",
+    "Gastroenterologist",
+    "Pulmonologist",
+    "Nephrologist",
+    "Endocrinologist",
+    "Oncologist",
+    "Urologist",
   ];
 
   return (
@@ -156,9 +192,16 @@ export default function ProfileFormPage() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {/* Personal Information Section */}
           <div className="rounded-md shadow-sm space-y-4">
-            <h3 className="text-xl font-bold text-gray-800">Personal & Contact Info</h3>
+            <h3 className="text-xl font-bold text-gray-800">
+              Personal & Contact Info
+            </h3>
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1">Full Name</label>
+              <label
+                htmlFor="fullName"
+                className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1"
+              >
+                Full Name
+              </label>
               <input
                 id="fullName"
                 name="fullName"
@@ -170,7 +213,12 @@ export default function ProfileFormPage() {
               />
             </div>
             <div>
-              <label htmlFor="fatherHusbandName" className="block text-sm font-medium text-gray-700">Father's / Husband's Name</label>
+              <label
+                htmlFor="fatherHusbandName"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Father's / Husband's Name
+              </label>
               <input
                 id="fatherHusbandName"
                 name="fatherHusbandName"
@@ -181,7 +229,12 @@ export default function ProfileFormPage() {
               />
             </div>
             <div>
-              <label htmlFor="contactNumber" className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1">Contact Number</label>
+              <label
+                htmlFor="contactNumber"
+                className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1"
+              >
+                Contact Number
+              </label>
               <input
                 id="contactNumber"
                 name="contactNumber"
@@ -194,7 +247,12 @@ export default function ProfileFormPage() {
               />
             </div>
             <div>
-              <label htmlFor="alternateContactNumber" className="block text-sm font-medium text-gray-700">Alternate Contact Number (Optional)</label>
+              <label
+                htmlFor="alternateContactNumber"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Alternate Contact Number (Optional)
+              </label>
               <input
                 id="alternateContactNumber"
                 name="alternateContactNumber"
@@ -209,9 +267,16 @@ export default function ProfileFormPage() {
 
           {/* Professional Information Section */}
           <div className="rounded-md shadow-sm space-y-4 pt-6 border-t border-gray-200">
-            <h3 className="text-xl font-bold text-gray-800">Professional Details</h3>
+            <h3 className="text-xl font-bold text-gray-800">
+              Professional Details
+            </h3>
             <div>
-              <label htmlFor="degreeQualification" className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1">Degree / Qualification</label>
+              <label
+                htmlFor="degreeQualification"
+                className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1"
+              >
+                Degree / Qualification
+              </label>
               <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {degrees.map((degree) => (
                   <div key={degree} className="flex items-center">
@@ -224,13 +289,23 @@ export default function ProfileFormPage() {
                       onChange={handleCheckboxChange}
                       required={formData.degreeQualification.length === 0} // HTML validation
                     />
-                    <label htmlFor={`degree-${degree}`} className="ml-2 text-sm text-gray-700">{degree}</label>
+                    <label
+                      htmlFor={`degree-${degree}`}
+                      className="ml-2 text-sm text-gray-700"
+                    >
+                      {degree}
+                    </label>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <label htmlFor="specialization" className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1">Specialization</label>
+              <label
+                htmlFor="specialization"
+                className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1"
+              >
+                Specialization
+              </label>
               <select
                 id="specialization"
                 name="specialization"
@@ -239,14 +314,23 @@ export default function ProfileFormPage() {
                 value={formData.specialization}
                 onChange={handleInputChange}
               >
-                <option value="" disabled>Select a specialization</option>
+                <option value="" disabled>
+                  Select a specialization
+                </option>
                 {specializations.map((spec) => (
-                  <option key={spec} value={spec}>{spec}</option>
+                  <option key={spec} value={spec}>
+                    {spec}
+                  </option>
                 ))}
               </select>
             </div>
             <div>
-              <label htmlFor="registrationNumber" className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1">Registration Number</label>
+              <label
+                htmlFor="registrationNumber"
+                className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1"
+              >
+                Registration Number
+              </label>
               <input
                 id="registrationNumber"
                 name="registrationNumber"
@@ -258,7 +342,12 @@ export default function ProfileFormPage() {
               />
             </div>
             <div>
-              <label htmlFor="yearsOfExperience" className="block text-sm font-medium text-gray-700">Years of Experience</label>
+              <label
+                htmlFor="yearsOfExperience"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Years of Experience
+              </label>
               <input
                 id="yearsOfExperience"
                 name="yearsOfExperience"
@@ -275,7 +364,12 @@ export default function ProfileFormPage() {
           <div className="rounded-md shadow-sm space-y-4 pt-6 border-t border-gray-200">
             <h3 className="text-xl font-bold text-gray-800">Clinic & Hours</h3>
             <div>
-              <label htmlFor="clinicHospitalName" className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1">Clinic / Hospital Name</label>
+              <label
+                htmlFor="clinicHospitalName"
+                className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1"
+              >
+                Clinic / Hospital Name
+              </label>
               <input
                 id="clinicHospitalName"
                 name="clinicHospitalName"
@@ -287,7 +381,12 @@ export default function ProfileFormPage() {
               />
             </div>
             <div>
-              <label htmlFor="clinicHospitalAddress" className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1">Clinic / Hospital Address</label>
+              <label
+                htmlFor="clinicHospitalAddress"
+                className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1"
+              >
+                Clinic / Hospital Address
+              </label>
               <textarea
                 id="clinicHospitalAddress"
                 name="clinicHospitalAddress"
@@ -299,7 +398,12 @@ export default function ProfileFormPage() {
               />
             </div>
             <div>
-              <label htmlFor="pincode" className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1">Pincode</label>
+              <label
+                htmlFor="pincode"
+                className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1"
+              >
+                Pincode
+              </label>
               <input
                 id="pincode"
                 name="pincode"
@@ -311,7 +415,12 @@ export default function ProfileFormPage() {
               />
             </div>
             <div>
-              <label htmlFor="workingDays" className="block text-sm font-medium text-gray-700">Working Days</label>
+              <label
+                htmlFor="workingDays"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Working Days
+              </label>
               <div className="mt-2 flex flex-wrap gap-2">
                 {workingDaysList.map((day) => (
                   <div key={day} className="flex items-center">
@@ -323,13 +432,23 @@ export default function ProfileFormPage() {
                       className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       onChange={handleCheckboxChange}
                     />
-                    <label htmlFor={`day-${day}`} className="ml-2 text-sm text-gray-700">{day}</label>
+                    <label
+                      htmlFor={`day-${day}`}
+                      className="ml-2 text-sm text-gray-700"
+                    >
+                      {day}
+                    </label>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <label htmlFor="workingHours" className="block text-sm font-medium text-gray-700">Working Hours</label>
+              <label
+                htmlFor="workingHours"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Working Hours
+              </label>
               <input
                 id="workingHours"
                 name="workingHours"
@@ -341,7 +460,12 @@ export default function ProfileFormPage() {
               />
             </div>
             <div>
-              <label htmlFor="emergencyAvailability" className="block text-sm font-medium text-gray-700">Emergency Availability</label>
+              <label
+                htmlFor="emergencyAvailability"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Emergency Availability
+              </label>
               <select
                 id="emergencyAvailability"
                 name="emergencyAvailability"
@@ -359,7 +483,9 @@ export default function ProfileFormPage() {
           <div className="rounded-md shadow-sm space-y-4 pt-6 border-t border-gray-200">
             <h3 className="text-xl font-bold text-gray-800">Services & Fees</h3>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Services Provided</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Services Provided
+              </label>
               <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {servicesList.map((service) => (
                   <div key={service} className="flex items-start">
@@ -371,13 +497,23 @@ export default function ProfileFormPage() {
                       className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1"
                       onChange={handleCheckboxChange}
                     />
-                    <label htmlFor={`service-${service}`} className="ml-2 text-sm text-gray-700">{service}</label>
+                    <label
+                      htmlFor={`service-${service}`}
+                      className="ml-2 text-sm text-gray-700"
+                    >
+                      {service}
+                    </label>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <label htmlFor="govtHealthSchemeTieUp" className="block text-sm font-medium text-gray-700">Govt. Health Scheme Tie-up</label>
+              <label
+                htmlFor="govtHealthSchemeTieUp"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Govt. Health Scheme Tie-up
+              </label>
               <select
                 id="govtHealthSchemeTieUp"
                 name="govtHealthSchemeTieUp"
@@ -391,7 +527,12 @@ export default function ProfileFormPage() {
               </select>
             </div>
             <div>
-              <label htmlFor="consultationFee" className="block text-sm font-medium text-gray-700">Consultation Fee</label>
+              <label
+                htmlFor="consultationFee"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Consultation Fee
+              </label>
               <input
                 id="consultationFee"
                 name="consultationFee"
