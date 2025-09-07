@@ -26,45 +26,62 @@ export default function Auth() {
     }
   };
 
-  const handleAuth = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
+const handleAuth = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setMessage("");
 
-    if (isLogin) {
-      const { data, error: signInError } =
-        await supabase.auth.signInWithPassword({ email, password });
-      if (signInError) {
-        setMessage(signInError.message);
-      } else if (data.user) {
-        // Call the new function after successful login
-        await checkProfileAndRedirect(data.user);
+  if (isLogin) {
+    const { data, error: signInError } =
+      await supabase.auth.signInWithPassword({ email, password });
+    if (signInError) {
+      setMessage(signInError.message);
+    } else if (data.user) {
+      // 🔑 Store doctor info for chat
+      localStorage.setItem('currentUser', JSON.stringify({
+        id: data.user.id,
+        email: data.user.email,
+        role: 'doctor'
+      }));
+      
+      await checkProfileAndRedirect(data.user);
+    }
+  } else {
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { role: "doctor" }
       }
-    } else {
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-      if (signUpError) {
-        setMessage(signUpError.message);
-      } else if (data.user) {
-        const { error: insertError } = await supabase
-          .from("profiles")
-          .insert({
-            id: data.user.id,
-            email: data.user.email,
-            is_profile_complete: false,
-          });
+    });
+    
+    if (signUpError) {
+      setMessage(signUpError.message);
+    } else if (data.user) {
+      // 🔑 Store doctor info for chat
+      localStorage.setItem('currentUser', JSON.stringify({
+        id: data.user.id,
+        email: data.user.email,
+        role: 'doctor'
+      }));
+      
+      const { error: insertError } = await supabase
+        .from("profiles")
+        .insert({
+          id: data.user.id,
+          email: data.user.email,
+          is_profile_complete: false,
+        });
 
-        if (insertError) {
-          setMessage("Sign up successful, but could not create profile.");
-        } else {
-          setMessage("Check your email to confirm your account!");
-        }
+      if (insertError) {
+        setMessage("Sign up successful, but could not create profile.");
+      } else {
+        setMessage("Check your email to confirm your account!");
       }
     }
-    setLoading(false);
-  };
+  }
+  setLoading(false);
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
