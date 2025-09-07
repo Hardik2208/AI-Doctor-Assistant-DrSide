@@ -7,7 +7,7 @@ import Auth from "./assets/pages/Auth";
 import DashboardContent from "./assets/pages/DashboardContent";
 import InboxPage from "./assets/pages/InboxPage";
 import PatientsPage from "./assets/pages/PatientsPage";
-import AppointmentsPage from "./assets/pages/AppointmentsPage";
+import AppointmentsPage from "./assets/pages/Appointmentspage";
 import ReportsPage from "./assets/pages/ReportsPage";
 import VitalsPage from "./assets/pages/VitalsPage";
 import SettingsPage from "./assets/pages/SettingsPage";
