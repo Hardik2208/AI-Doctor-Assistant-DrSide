@@ -61,8 +61,6 @@ export default function ProfileFormPage() {
     });
   };
 
-  // ... inside your ProfileFormPage component
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -108,8 +106,6 @@ export default function ProfileFormPage() {
       const response = await axios.post(backendApiUrl, requestData);
 
       if (response.status === 201) {
-        // You may want to update the 'profiles' table in Supabase
-        // as well, linking the two. This part of your code is correct.
         const { error: updateError } = await supabase
           .from("profiles")
           .update({ is_profile_complete: "true" })
@@ -123,7 +119,13 @@ export default function ProfileFormPage() {
         navigate("/");
       }
     } catch (error) {
-      // ... error handling
+      if (error.response) {
+        setMessage(error.response.data.message || "Failed to create profile.");
+      } else if (error.message) {
+        setMessage(`Failed to update profile status: ${error.message}`);
+      } else {
+        setMessage("An unexpected error occurred. Please try again.");
+      }
     } finally {
       setSubmitting(false);
     }
