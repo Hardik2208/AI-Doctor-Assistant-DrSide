@@ -3,13 +3,20 @@ import { supabase } from "./supabaseClient";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// A small CSS rule to visually indicate required fields
+const requiredFieldLabel = {
+  content: '"*"',
+  color: 'red',
+  marginLeft: '4px',
+};
+
 export default function ProfileFormPage() {
   const [formData, setFormData] = useState({
     fullName: "",
     fatherHusbandName: "",
     contactNumber: "",
     alternateContactNumber: "",
-    email: "", // This will be pre-filled from the user session
+    email: "", // This will be populated from the user session
     degreeQualification: [],
     specialization: "",
     registrationNumber: "",
@@ -76,18 +83,16 @@ export default function ProfileFormPage() {
       const requestData = {
         ...formData,
         email: user.email,
-        contactNumber: Number(formData.contactNumber),
-        alternateContactNumber: formData.alternateContactNumber ? Number(formData.alternateContactNumber) : undefined,
-        yearsOfExperience: Number(formData.yearsOfExperience),
-        pincode: Number(formData.pincode),
-        consultationFee: Number(formData.consultationFee),
+        contactNumber: formData.contactNumber ? Number(formData.contactNumber) : null,
+        alternateContactNumber: formData.alternateContactNumber ? Number(formData.alternateContactNumber) : null,
+        yearsOfExperience: formData.yearsOfExperience ? Number(formData.yearsOfExperience) : null,
+        pincode: formData.pincode ? Number(formData.pincode) : null,
+        consultationFee: formData.consultationFee ? Number(formData.consultationFee) : null,
       };
 
-      // 1. Send profile data to the backend API.
       const response = await axios.post(backendApiUrl, requestData);
 
       if (response.status === 201) {
-        // 2. Update the profile using the user's email.
         const { error: updateError } = await supabase
           .from("profiles")
           .update({ is_profile_complete: 'true' })
@@ -97,7 +102,6 @@ export default function ProfileFormPage() {
           throw updateError;
         }
 
-        // ✅ Save the user's email to local storage.
         localStorage.setItem("userEmail", user.email);
         navigate("/");
       }
@@ -131,6 +135,13 @@ export default function ProfileFormPage() {
     'Ayush / Alternative Medicine (Ayurveda, Homeopathy, Unani, Yoga, Naturopathy)',
   ];
 
+  const specializations = [
+    'General Physician', 'Pediatrician', 'Gynecologist / Obstetrician (Women’s Health)',
+    'Cardiologist', 'Neurologist', 'Orthopedic Doctor', 'Dermatologist', 'Psychiatrist',
+    'Ophthalmologist', 'ENT Specialist', 'Gastroenterologist', 'Pulmonologist',
+    'Nephrologist', 'Endocrinologist', 'Oncologist', 'Urologist'
+  ];
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-xl w-full space-y-8 bg-white p-10 rounded-xl shadow-2xl border border-gray-100">
@@ -147,7 +158,7 @@ export default function ProfileFormPage() {
           <div className="rounded-md shadow-sm space-y-4">
             <h3 className="text-xl font-bold text-gray-800">Personal & Contact Info</h3>
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">Full Name</label>
+              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1">Full Name</label>
               <input
                 id="fullName"
                 name="fullName"
@@ -170,11 +181,12 @@ export default function ProfileFormPage() {
               />
             </div>
             <div>
-              <label htmlFor="contactNumber" className="block text-sm font-medium text-gray-700">Contact Number</label>
+              <label htmlFor="contactNumber" className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1">Contact Number</label>
               <input
                 id="contactNumber"
                 name="contactNumber"
-                type="text"
+                type="tel" // Using 'tel' for better mobile keyboard experience
+                pattern="[0-9]*" // Restrict to numbers
                 required
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 value={formData.contactNumber}
@@ -186,7 +198,8 @@ export default function ProfileFormPage() {
               <input
                 id="alternateContactNumber"
                 name="alternateContactNumber"
-                type="text"
+                type="tel"
+                pattern="[0-9]*"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 value={formData.alternateContactNumber}
                 onChange={handleInputChange}
@@ -198,7 +211,7 @@ export default function ProfileFormPage() {
           <div className="rounded-md shadow-sm space-y-4 pt-6 border-t border-gray-200">
             <h3 className="text-xl font-bold text-gray-800">Professional Details</h3>
             <div>
-              <label htmlFor="degreeQualification" className="block text-sm font-medium text-gray-700">Degree / Qualification</label>
+              <label htmlFor="degreeQualification" className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1">Degree / Qualification</label>
               <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {degrees.map((degree) => (
                   <div key={degree} className="flex items-center">
@@ -209,6 +222,7 @@ export default function ProfileFormPage() {
                       value={degree}
                       className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       onChange={handleCheckboxChange}
+                      required={formData.degreeQualification.length === 0} // HTML validation
                     />
                     <label htmlFor={`degree-${degree}`} className="ml-2 text-sm text-gray-700">{degree}</label>
                   </div>
@@ -216,19 +230,23 @@ export default function ProfileFormPage() {
               </div>
             </div>
             <div>
-              <label htmlFor="specialization" className="block text-sm font-medium text-gray-700">Specialization</label>
-              <input
+              <label htmlFor="specialization" className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1">Specialization</label>
+              <select
                 id="specialization"
                 name="specialization"
-                type="text"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="e.g., General Physician, Orthopedics"
+                required
+                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                 value={formData.specialization}
                 onChange={handleInputChange}
-              />
+              >
+                <option value="" disabled>Select a specialization</option>
+                {specializations.map((spec) => (
+                  <option key={spec} value={spec}>{spec}</option>
+                ))}
+              </select>
             </div>
             <div>
-              <label htmlFor="registrationNumber" className="block text-sm font-medium text-gray-700">Registration Number</label>
+              <label htmlFor="registrationNumber" className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1">Registration Number</label>
               <input
                 id="registrationNumber"
                 name="registrationNumber"
@@ -257,7 +275,7 @@ export default function ProfileFormPage() {
           <div className="rounded-md shadow-sm space-y-4 pt-6 border-t border-gray-200">
             <h3 className="text-xl font-bold text-gray-800">Clinic & Hours</h3>
             <div>
-              <label htmlFor="clinicHospitalName" className="block text-sm font-medium text-gray-700">Clinic / Hospital Name</label>
+              <label htmlFor="clinicHospitalName" className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1">Clinic / Hospital Name</label>
               <input
                 id="clinicHospitalName"
                 name="clinicHospitalName"
@@ -269,7 +287,7 @@ export default function ProfileFormPage() {
               />
             </div>
             <div>
-              <label htmlFor="clinicHospitalAddress" className="block text-sm font-medium text-gray-700">Clinic / Hospital Address</label>
+              <label htmlFor="clinicHospitalAddress" className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1">Clinic / Hospital Address</label>
               <textarea
                 id="clinicHospitalAddress"
                 name="clinicHospitalAddress"
@@ -281,7 +299,7 @@ export default function ProfileFormPage() {
               />
             </div>
             <div>
-              <label htmlFor="pincode" className="block text-sm font-medium text-gray-700">Pincode</label>
+              <label htmlFor="pincode" className="block text-sm font-medium text-gray-700 after:content-['*'] after:text-red-500 after:ml-1">Pincode</label>
               <input
                 id="pincode"
                 name="pincode"
