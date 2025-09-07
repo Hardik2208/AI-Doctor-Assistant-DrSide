@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { supabase } from "./assets/pages/supabaseClient";
 
+import RecentChats from "./assets/component/RecentChat";
+import ChatRoom from "./assets/pages/ChatRoom";
+
 // Pages
 import Auth from "./assets/pages/Auth";
 import DashboardContent from "./assets/pages/DashboardContent";
@@ -12,6 +15,8 @@ import ReportsPage from "./assets/pages/ReportsPage";
 import VitalsPage from "./assets/pages/VitalsPage";
 import SettingsPage from "./assets/pages/SettingsPage";
 import ProfileFormPage from "./assets/pages/ProfileFormPage";
+
+
 
 // Components
 import Sidebar from "./assets/component/Sidebar";
@@ -31,6 +36,9 @@ const MainAppLayout = () => (
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/vitals" element={<VitalsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+
+        <Route path="/chats" element={<RecentChats />} />
+        <Route path="/chat/:roomId" element={<ChatRoom />} />
         </Routes>
       </div>
     </div>

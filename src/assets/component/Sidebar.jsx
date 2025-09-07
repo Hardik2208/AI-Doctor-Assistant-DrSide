@@ -8,6 +8,7 @@ import {
   FileText,
   Activity,
   Settings,
+    MessageCircle, // Add this import
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -17,6 +18,7 @@ export default function Sidebar() {
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/" },
     { key: "inbox", label: "Inbox", icon: Inbox, path: "/inbox" },
     { key: "patients", label: "Patients", icon: Users, path: "/patients" },
+        { key: "chats", label: "Recent Chats", icon: MessageCircle, path: "/chats" }, // Add this line
     {
       key: "appointments",
       label: "Appointments",

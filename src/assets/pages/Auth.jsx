@@ -37,8 +37,8 @@ const handleAuth = async (e) => {
     if (signInError) {
       setMessage(signInError.message);
     } else if (data.user) {
-      // 🔑 Store doctor info for chat
-      localStorage.setItem('currentUser', JSON.stringify({
+      // 🔑 Store doctor info for chat - CHANGED KEY
+      localStorage.setItem('currentDoctor', JSON.stringify({
         id: data.user.id,
         email: data.user.email,
         role: 'doctor'
@@ -58,8 +58,8 @@ const handleAuth = async (e) => {
     if (signUpError) {
       setMessage(signUpError.message);
     } else if (data.user) {
-      // 🔑 Store doctor info for chat
-      localStorage.setItem('currentUser', JSON.stringify({
+      // 🔑 Store doctor info for chat - CHANGED KEY
+      localStorage.setItem('currentDoctor', JSON.stringify({
         id: data.user.id,
         email: data.user.email,
         role: 'doctor'
