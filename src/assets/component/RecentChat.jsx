@@ -22,20 +22,20 @@ export default function RecentChats() {
     }
   }, []);
 
-  const fetchDoctorChats = async (doctorId) => {
-    try {
-      // Fetch all chat rooms that include this doctor's ID
-      const response = await axios.get(
-        `http://localhost:3001/api/chat/doctor-chats/${doctorId}`
-      );
-      setChats(response.data);
-    } catch (error) {
-      console.error('Error fetching chats:', error);
-      setChats([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchDoctorChats = async (doctorId) => {
+  try {
+    // Fetch all chat rooms that include this doctor's ID
+    const response = await axios.get(
+      `https://ai-doctor-assistant-backend-ai-ml.onrender.com/api/chat/doctor-chats/${doctorId}`
+    );
+    setChats(response.data);
+  } catch (error) {
+    console.error('Error fetching chats:', error);
+    setChats([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const joinChat = (chat) => {
     if (!currentDoctor) return;
