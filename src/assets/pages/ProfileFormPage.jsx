@@ -61,75 +61,90 @@ export default function ProfileFormPage() {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setMessage("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setSubmitting(true);
+  setMessage("");
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    const user = session?.user;
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
 
-    if (!user) {
-      setMessage("Error: No active user session found. Please log in again.");
-      setSubmitting(false);
-      return;
-    }
+  if (!user) {
+    setMessage("Error: No active user session found. Please log in again.");
+    setSubmitting(false);
+    return;
+  }
 
-    // Get the Supabase ID from the authenticated user object
-    const supabaseId = user.id;
+  // --- VALIDATION CHECKS AND DATA PREPARATION ---
 
-    const backendApiUrl = `https://ai-doctor-assistant-backend-ai-ml.onrender.com/api/doctor-profile`;
+  // 1. Check for required string fields
+  if (!formData.fullName || !formData.specialization || !formData.registrationNumber || !formData.clinicHospitalName || !formData.clinicHospitalAddress || !formData.pincode) {
+    setMessage("Please fill in all required fields.");
+    setSubmitting(false);
+    return;
+  }
+  
+  // 2. Check for required array fields
+  if (formData.degreeQualification.length === 0) {
+    setMessage("Please select at least one degree/qualification.");
+    setSubmitting(false);
+    return;
+  }
 
-    try {
-      const requestData = {
-        ...formData,
-        email: user.email,
-        // Pass the Supabase ID to your backend
-        supabaseId: supabaseId,
-        contactNumber: formData.contactNumber
-          ? Number(formData.contactNumber)
-          : null,
-        alternateContactNumber: formData.alternateContactNumber
-          ? Number(formData.alternateContactNumber)
-          : null,
-        yearsOfExperience: formData.yearsOfExperience
-          ? Number(formData.yearsOfExperience)
-          : null,
-        pincode: formData.pincode ? Number(formData.pincode) : null,
-        consultationFee: formData.consultationFee
-          ? Number(formData.consultationFee)
-          : null,
-      };
+  // 3. Prepare the request data object
+  const requestData = { ...formData, email: user.email, supabaseId: user.id };
 
-      const response = await axios.post(backendApiUrl, requestData);
-
-      if (response.status === 201) {
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({ is_profile_complete: "true" })
-          .eq("email", user.email);
-
-        if (updateError) {
-          throw updateError;
-        }
-
-        localStorage.setItem("userEmail", user.email);
-        navigate("/");
+  // 4. Handle number fields and check for NaN
+  const numberFields = ['contactNumber', 'alternateContactNumber', 'yearsOfExperience', 'pincode', 'consultationFee'];
+  for (const field of numberFields) {
+    if (formData[field] !== "") {
+      const numValue = Number(formData[field]);
+      if (isNaN(numValue)) {
+        setMessage(`Please enter a valid number for ${field}.`);
+        setSubmitting(false);
+        return;
       }
-    } catch (error) {
-      if (error.response) {
-        setMessage(error.response.data.message || "Failed to create profile.");
-      } else if (error.message) {
-        setMessage(`Failed to update profile status: ${error.message}`);
-      } else {
-        setMessage("An unexpected error occurred. Please try again.");
-      }
-    } finally {
-      setSubmitting(false);
+      requestData[field] = numValue;
+    } else {
+      requestData[field] = null;
     }
-  };
+  }
+  
+  // --- END OF VALIDATION CHECKS AND DATA PREPARATION ---
+
+  // Log the data object AFTER it has been prepared
+  console.log("Data being sent to backend:", requestData);
+
+  const backendApiUrl = `https://ai-doctor-assistant-backend-ai-ml.onrender.com/api/doctor-profile`;
+
+  try {
+    const response = await axios.post(backendApiUrl, requestData);
+
+    if (response.status === 200 || response.status === 201) {
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ is_profile_complete: "true" })
+        .eq("email", user.email);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      localStorage.setItem("userEmail", user.email);
+      navigate("/");
+    }
+  } catch (error) {
+    if (error.response && error.response.data) {
+      setMessage(error.response.data.message || "Failed to create/update profile.");
+    } else {
+      setMessage("An unexpected error occurred. Please try again.");
+    }
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   const degrees = [
     "MBBS",

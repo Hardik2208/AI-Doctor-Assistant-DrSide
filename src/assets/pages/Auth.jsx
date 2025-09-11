@@ -10,15 +10,14 @@ export default function Auth() {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
-  // New function to check profile status and redirect
+  // Function to check profile status and redirect
   const checkProfileAndRedirect = async (user) => {
     const { data: profiles, error } = await supabase
       .from("profiles")
       .select("is_profile_complete")
-      .eq("email", user.email) // ✅ Use email to query the table
+      .eq("email", user.email)
       .single();
 
-    // The previous error was here due to profiles being null
     if (error || !profiles || profiles.is_profile_complete !== "true") {
       navigate("/complete-profile");
     } else {
@@ -26,10 +25,10 @@ export default function Auth() {
     }
   };
 
-const handleAuth = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setMessage("");
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
 
   if (isLogin) {
     const { data, error: signInError } =
@@ -37,8 +36,8 @@ const handleAuth = async (e) => {
     if (signInError) {
       setMessage(signInError.message);
     } else if (data.user) {
-      // 🔑 Store doctor info for chat - CHANGED KEY
-      localStorage.setItem('currentDoctor', JSON.stringify({
+      // 🔑 Store doctor info for chat
+      localStorage.setItem('currentUser', JSON.stringify({
         id: data.user.id,
         email: data.user.email,
         role: 'doctor'
@@ -58,8 +57,8 @@ const handleAuth = async (e) => {
     if (signUpError) {
       setMessage(signUpError.message);
     } else if (data.user) {
-      // 🔑 Store doctor info for chat - CHANGED KEY
-      localStorage.setItem('currentDoctor', JSON.stringify({
+      // 🔑 Store doctor info for chat
+      localStorage.setItem('currentUser', JSON.stringify({
         id: data.user.id,
         email: data.user.email,
         role: 'doctor'
@@ -70,18 +69,21 @@ const handleAuth = async (e) => {
         .insert({
           id: data.user.id,
           email: data.user.email,
-          is_profile_complete: false,
+          is_profile_complete: "false",
         });
 
-      if (insertError) {
-        setMessage("Sign up successful, but could not create profile.");
-      } else {
-        setMessage("Check your email to confirm your account!");
+        if (upsertError) {
+          setMessage(
+            "Sign up successful, but could not create/update profile."
+          );
+          console.error("Upsert failed:", upsertError);
+        } else {
+          setMessage("Check your email to confirm your account!");
+        }
       }
     }
-  }
-  setLoading(false);
-};
+    setLoading(false);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
