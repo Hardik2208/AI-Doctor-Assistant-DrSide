@@ -15,12 +15,31 @@ export default function RecentChats() {
     if (doctorData) {
       const doctor = JSON.parse(doctorData);
       setCurrentDoctor(doctor);
-      fetchDoctorChats(doctor.id); // doctor's supabase UID
+    // 🚀 Call fetchDoctorProfile instead of fetchDoctorChats directly
+    fetchDoctorProfile(doctor.id); // doctor.id = supabaseId
     } else {
       console.error('No doctor logged in');
       setLoading(false);
     }
   }, []);
+
+  //fetch profile of doctor
+  const fetchDoctorProfile = async (supabaseId) => {
+  try {
+    const response = await axios.get(
+      `https://ai-doctor-assistant-backend-ai-ml.onrender.com/api/doctor-profile/by-supabase/${supabaseId}`
+    );
+
+    const doctorProfile = response.data; // full MongoDB doctor document
+    
+    // Step 2: Now fetch chats using MongoDB _id
+    fetchDoctorChats(doctorProfile.supabaseId);
+  } catch (error) {
+    console.error("Error fetching doctor profile:", error);
+    setLoading(false);
+  }
+};
+
 
 const fetchDoctorChats = async (doctorId) => {
   try {

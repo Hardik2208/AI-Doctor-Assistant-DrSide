@@ -37,11 +37,12 @@ export default function Auth() {
       setMessage(signInError.message);
     } else if (data.user) {
       // 🔑 Store doctor info for chat
-      localStorage.setItem('currentUser', JSON.stringify({
-        id: data.user.id,
-        email: data.user.email,
-        role: 'doctor'
-      }));
+  // After login success
+localStorage.setItem('currentDoctor', JSON.stringify({
+  id: data.user.id,          // supabaseId
+  email: data.user.email,
+  role: 'doctor'
+}));
       
       await checkProfileAndRedirect(data.user);
     }
@@ -58,11 +59,11 @@ export default function Auth() {
       setMessage(signUpError.message);
     } else if (data.user) {
       // 🔑 Store doctor info for chat
-      localStorage.setItem('currentUser', JSON.stringify({
-        id: data.user.id,
-        email: data.user.email,
-        role: 'doctor'
-      }));
+localStorage.setItem('currentDoctor', JSON.stringify({
+  id: data.user.id,          // supabaseId
+  email: data.user.email,
+  role: 'doctor'
+}));
       
       const { error: insertError } = await supabase
         .from("profiles")
