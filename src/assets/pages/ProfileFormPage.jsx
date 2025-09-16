@@ -129,35 +129,32 @@ console.log("=== END DEBUG ===");
 
   const backendApiUrl = `https://ai-doctor-assistant-backend-ai-ml.onrender.com/api/doctor-profile`;
 
-  try {
-    const response = await axios.post(backendApiUrl, requestData);
+try {
+  const response = await axios.post(backendApiUrl, requestData);
 
-    if (response.status === 200 || response.status === 201) {
-const { error: updateError } = await supabase
-  .from("profiles")
-  .upsert({ 
-    email: user.email, 
-    is_profile_complete: true 
-  }, { 
-    onConflict: 'email' 
-  });
+  if (response.status === 200 || response.status === 201) {
+    // Simple direct update - no upsert needed since profile already exists from trigger
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ is_profile_complete: true })
+      .eq("email", user.email);
 
-      if (updateError) {
-        throw updateError;
-      }
-
-      localStorage.setItem("userEmail", user.email);
-      navigate("/");
+    if (updateError) {
+      console.error("Profile update error:", updateError);
     }
-  } catch (error) {
-    if (error.response && error.response.data) {
-      setMessage(error.response.data.message || "Failed to create/update profile.");
-    } else {
-      setMessage("An unexpected error occurred. Please try again.");
-    }
-  } finally {
-    setSubmitting(false);
+
+    localStorage.setItem("userEmail", user.email);
+    navigate("/");
   }
+} catch (error) {
+  if (error.response && error.response.data) {
+    setMessage(error.response.data.message || "Failed to create/update profile.");
+  } else {
+    setMessage("An unexpected error occurred. Please try again.");
+  }
+} finally {
+  setSubmitting(false);
+}
 };
 
   const degrees = [
