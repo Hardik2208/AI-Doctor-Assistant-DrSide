@@ -113,6 +113,16 @@ const handleSubmit = async (e) => {
   }
   
   // --- END OF VALIDATION CHECKS AND DATA PREPARATION ---
+// Add this right before your axios.post call:
+
+console.log("=== DEBUG INFO ===");
+console.log("User object:", user);
+console.log("User ID:", user.id);
+console.log("User email:", user.email);
+console.log("Form data:", formData);
+console.log("Request data being sent:", requestData);
+console.log("Request data JSON:", JSON.stringify(requestData, null, 2));
+console.log("=== END DEBUG ===");
 
   // Log the data object AFTER it has been prepared
   console.log("Data being sent to backend:", requestData);
