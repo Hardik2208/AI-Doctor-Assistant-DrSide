@@ -137,7 +137,7 @@ const { error: updateError } = await supabase
   .from("profiles")
   .upsert({ 
     email: user.email, 
-    is_profile_complete: "true" 
+    is_profile_complete: true 
   }, { 
     onConflict: 'email' 
   });
