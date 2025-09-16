@@ -123,10 +123,14 @@ const handleSubmit = async (e) => {
     const response = await axios.post(backendApiUrl, requestData);
 
     if (response.status === 200 || response.status === 201) {
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ is_profile_complete: "true" })
-        .eq("email", user.email);
+const { error: updateError } = await supabase
+  .from("profiles")
+  .upsert({ 
+    email: user.email, 
+    is_profile_complete: "true" 
+  }, { 
+    onConflict: 'email' 
+  });
 
       if (updateError) {
         throw updateError;
